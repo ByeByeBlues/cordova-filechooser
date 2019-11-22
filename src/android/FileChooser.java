@@ -57,16 +57,23 @@ public class FileChooser extends CordovaPlugin {
                 Uri uri = data.getData();
 
                 if (uri != null) {
-					String[] filePathColumn = {android.provider.MediaStore.Images.Media.DATA};
-					Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
-					if (cursor.moveToFirst()) {
-						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-						String filePath = cursor.getString(columnIndex);
-						Log.w(TAG, filePath);
-						callback.success(filePath);
+					if ("content".equals(uri.getScheme()))
+					{
+						String path = "";
+						final String docId = DocumentsContract.getDocumentId(uri);
+						final String[] split = docId.split(":");
+						final String type = split[0];
+
+						if ("primary".equalsIgnoreCase(type))
+						{
+							path = "file://" + Environment.getExternalStorageDirectory() + "/" + split[1];
+						}
+
+						callback.success(path);
 					}
-					else {
-						callback.error("File uri was null");
+					else
+					{
+						callback.success(uri.toString());
 					}
                 } else {
 
